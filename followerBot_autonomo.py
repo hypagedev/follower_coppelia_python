@@ -20,7 +20,7 @@ class Bot:
         self.port = port
         self.velI = 0.03
         self.velD = 0.03
-        self.delta = 0.05
+        self.delta = 0.1
         self.speed = 0.0015
         self.radio_rueda = 0.027
 
@@ -86,19 +86,22 @@ class Bot:
         return pos
 
     def vel_follow(self):
-        kline = 0.001
+        kline = 0.01
         gray = 0.5
-        v = 0.015
-        imgM = self.sensor_ir(self.camMid)
-        imgL = self.sensor_ir(self.camLeft)
-        imgR = self.sensor_ir(self.camRight)
-        lsens = float(imgM)/255.0
-        w = -kline*(lsens - gray)
+        v = 0.01
+        imgM = self.sensor_ir(self.camMid)/255.0
+        imgL = self.sensor_ir(self.camLeft)/255.0
+        imgR = self.sensor_ir(self.camRight)/255.0
+
+        A = imgL - imgM
+        B = imgR - imgM
+
+        w = -kline*(A - B)
         vl = v - self.delta*w
         vr = v + self.delta*w
         wL = vl/self.radio_rueda
         wR = vr/self.radio_rueda
-        print("lsen: {}, w: {} , vl: {} , vr: {}, wL: {}, wR:{}".format(lsens, w,vl,vr,wL,wR))
+        print("A: {}, B: {}, w: {} , vl: {} , vr: {}, wL: {}, wR:{}".format(A,B, w,vl,vr,wL,wR))
         sim.simxSetJointTargetVelocity(self.clientID, self.motorRight, wR, sim.simx_opmode_oneshot)
         sim.simxSetJointTargetVelocity(self.clientID, self.motorLeft, wL, sim.simx_opmode_oneshot)
 
