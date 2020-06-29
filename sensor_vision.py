@@ -3,10 +3,8 @@ import sys
 import time
 import cv2
 import numpy as np
-
-
 def get_image(clientID, idcam):
-    _, resolution, image=sim.simxGetVisionSensorImage(clientID, idcam, 0, sim.simx_opmode_buffer)
+    _, resolution, image=sim.simxGetVisionSensorImage(clientID, idcam, 0, sim.simx_opmode_oneshot)
     if(len(resolution) == 0):
         print(idcam)
         return None
@@ -22,12 +20,14 @@ sim.simxFinish(-1) # cerrar todas las conexiones
 clientID=sim.simxStart('127.0.0.1',19999,True,True,5000,5)
 if clientID!=-1:
     print ('Conectado al API del servidor remoto')
-
+    _, camLeft = sim.simxGetObjectHandle(clientID, "LeftSensor", sim.simx_opmode_oneshot_wait)
+    _, camMid = sim.simxGetObjectHandle(clientID,"MiddleSensor", sim.simx_opmode_oneshot_wait)
+    _, camRight = sim.simxGetObjectHandle(clientID, "RightSensor", sim.simx_opmode_oneshot_wait)
 
     imgL = get_image(clientID,camLeft)
     imgM = get_image(clientID,camMid)
     imgR = get_image(clientID,camRight)
-
+    time.sleep(1)
     while(1):
         #Guardar frame de la camara, rotarlo y convertirlo a BGR
         imgL = get_image(clientID,camLeft)
